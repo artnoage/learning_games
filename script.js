@@ -32,6 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pairInputs.children.length === 0) {
         addPairInput();
     }
+    
+    // Add event listeners to existing remove buttons
+    document.querySelectorAll('.remove-pair').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const pairDiv = this.parentElement;
+            if (pairInputs.children.length > 1) {
+                pairInputs.removeChild(pairDiv);
+            }
+        });
+    });
 
     // Load default pairs from JSON file
     async function loadDefaultPairs() {
@@ -58,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Add event listener to remove button
                 const removeBtn = pairDiv.querySelector('.remove-pair');
-                removeBtn.addEventListener('click', () => {
+                removeBtn.addEventListener('click', function() {
                     if (pairInputs.children.length > 1) {
                         pairInputs.removeChild(pairDiv);
                     }
@@ -79,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pairDiv.innerHTML = `
             <input type="text" class="word1" placeholder="Word 1">
             <input type="text" class="word2" placeholder="Word 2">
-            <button class="remove-pair">✕</button>
+            <button type="button" class="remove-pair">✕</button>
         `;
         pairInputs.appendChild(pairDiv);
 
