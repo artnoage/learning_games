@@ -1,8 +1,8 @@
 # Gunicorn configuration file
-bind = "0.0.0.0:8001"  # Bind to all interfaces on port 8001
+bind = "127.0.0.1:8001"  # Bind to localhost for security (nginx will proxy)
 workers = 2  # Number of worker processes
 timeout = 30  # Worker timeout in seconds
-accesslog = "-"  # Log to stdout
-errorlog = "-"  # Log errors to stdout
+accesslog = "/var/log/memory_game/access.log"  # Log to file
+errorlog = "/var/log/memory_game/error.log"  # Log errors to file
 loglevel = "info"
 capture_output = True  # Capture stdout/stderr from workers
