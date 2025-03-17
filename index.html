@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Pairs Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Memory Pairs Game</h1>
+        
+        <div class="setup-area">
+            <h2>Create Your Pairs</h2>
+            <div class="pair-inputs">
+                <div class="pair">
+                    <input type="text" class="word1" placeholder="Word 1">
+                    <input type="text" class="word2" placeholder="Word 2">
+                    <button class="remove-pair">✕</button>
+                </div>
+            </div>
+            <button id="add-pair">Add Another Pair</button>
+            <button id="start-game">Start Game</button>
+        </div>
+
+        <div class="game-area hidden">
+            <div class="game-info">
+                <div class="timer">Time: <span id="time">0</span></div>
+                <div class="matches">Matches: <span id="matches">0</span>/<span id="total-pairs">0</span></div>
+            </div>
+            <div class="cards-container"></div>
+            <button id="restart-game">Restart Game</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
