@@ -5,11 +5,11 @@ import urllib.request
 if not os.path.exists('sounds'):
     os.makedirs('sounds')
 
-# URLs for free sound effects (these are placeholder URLs - replace with actual sound files)
+# URLs for free sound effects from GitHub (more reliable hosting)
 sound_urls = {
-    'match.mp3': 'https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3',
-    'wrong.mp3': 'https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3',
-    'levelup.mp3': 'https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3'
+    'match.mp3': 'https://raw.githubusercontent.com/iamcodemaker/euca/master/sounds/click.mp3',
+    'wrong.mp3': 'https://raw.githubusercontent.com/iamcodemaker/euca/master/sounds/error.mp3',
+    'levelup.mp3': 'https://raw.githubusercontent.com/iamcodemaker/euca/master/sounds/success.mp3'
 }
 
 # Download each sound file

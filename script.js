@@ -46,9 +46,23 @@ function initializeApp() {
         
         // Sound effects
         const sounds = {
-            match: new Audio('/sounds/match.mp3'),
-            wrong: new Audio('/sounds/wrong.mp3'),
-            levelUp: new Audio('/sounds/levelup.mp3')
+            match: null,
+            wrong: null,
+            levelUp: null
+        };
+        
+        // Initialize sounds after user interaction
+        const initSounds = () => {
+            if (!sounds.match) {
+                sounds.match = new Audio('/sounds/match.mp3');
+                sounds.wrong = new Audio('/sounds/wrong.mp3');
+                sounds.levelUp = new Audio('/sounds/levelup.mp3');
+                
+                // Preload sounds
+                sounds.match.load();
+                sounds.wrong.load();
+                sounds.levelUp.load();
+            }
         };
         
         // Game levels
@@ -227,6 +241,9 @@ function initializeApp() {
         };
         
         const startGame = () => {
+            // Initialize sounds (must be triggered by user interaction)
+            initSounds();
+            
             // Filter valid pairs
             const validPairs = wordPairs.value.filter(pair => 
                 pair.word1.trim() !== '' && pair.word2.trim() !== ''
@@ -352,7 +369,10 @@ function initializeApp() {
                 score.value += 1;
                 
                 // Play match sound
-                sounds.match.play().catch(e => console.log('Error playing sound:', e));
+                if (sounds.match) {
+                    sounds.match.currentTime = 0;
+                    sounds.match.play().catch(e => console.log('Error playing sound:', e));
+                }
                 
                 // Add visual feedback
                 addMatchAnimation(card1, card2);
@@ -366,7 +386,10 @@ function initializeApp() {
                 score.value = Math.max(0, score.value - 1); // Don't go below 0
                 
                 // Play wrong sound
-                sounds.wrong.play().catch(e => console.log('Error playing sound:', e));
+                if (sounds.wrong) {
+                    sounds.wrong.currentTime = 0;
+                    sounds.wrong.play().catch(e => console.log('Error playing sound:', e));
+                }
                 
                 // Add visual feedback for wrong match
                 addWrongAnimation(card1, card2);
@@ -431,7 +454,10 @@ function initializeApp() {
                     localStorage.setItem('memoryGameUnlockedLevels', JSON.stringify(unlockedLevels));
                     
                     // Play level up sound
-                    sounds.levelUp.play().catch(e => console.log('Error playing sound:', e));
+                    if (sounds.levelUp) {
+                        sounds.levelUp.currentTime = 0;
+                        sounds.levelUp.play().catch(e => console.log('Error playing sound:', e));
+                    }
                     
                     setTimeout(() => {
                         alert(`Congratulations! You completed level ${currentLevel.value} with a score of ${finalScore}!\n\nYou've unlocked level ${currentLevel.value + 1}!`);
