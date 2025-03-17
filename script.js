@@ -53,9 +53,9 @@ function initializeApp() {
         
         // Sound file paths
         const soundPaths = {
-            match: '/sounds/match.mp3',
-            wrong: '/sounds/wrong.mp3',
-            levelUp: '/sounds/levelup.mp3'
+            match: '/sounds/match.wav',
+            wrong: '/sounds/wrong.wav',
+            levelUp: '/sounds/levelup.wav'
         };
         
         // Initialize sounds after user interaction
