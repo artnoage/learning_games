@@ -8,6 +8,9 @@ def index():
 
 @app.route('/<path:path>')
 def serve_file(path):
+    # Set correct MIME type for audio files
+    if path.endswith('.mp3'):
+        return send_from_directory('.', path, mimetype='audio/mpeg')
     return send_from_directory('.', path)
 
 @app.route('/api/default-pairs')

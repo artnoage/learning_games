@@ -44,24 +44,44 @@ function initializeApp() {
         const score = ref(0);
         const highScores = ref(JSON.parse(localStorage.getItem('memoryGameHighScores') || '{}'));
         
-        // Sound effects
+        // Sound effects using base64 encoded audio data
         const sounds = {
             match: null,
             wrong: null,
             levelUp: null
         };
         
+        // Base64 encoded short audio clips
+        const audioData = {
+            match: 'data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAAFAAAGUACFhYWFhYWFhYWFhYWFhYWFhYWFvb29vb29vb29vb29vb29vb29vb3T09PT09PT09PT09PT09PT09PT0/////////////////////8AAAA8TEFNRTMuMTAwBEgAAAAAAAAAABUgJAMGQQABmgAABlAiznawAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=',
+            wrong: 'data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAAKAAAQsAAYGBgYGBgYGBgYGBgYGBgYGBgYRERERERERERERERERERERERERGhoaGhoaGhoaGhoaGhoaGhoaGiGhoaGhoaGhoaGhoaGhoaGhoaGhtTU1NTU1NTU1NTU1NTU1NTU1NT4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4//////////////////////////8AAAA8TEFNRTMuMTAwBEgAAAAAAAAAABUgJAMGQQABmgAAELADjS/YAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=',
+            levelUp: 'data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAALAAAJhwAICAgQEBAYGBgYICAoKCgoMDAwMDg4ODhAQEBISEhIUFBQUFhYWFhgYGBgaGhoaHBwcHB4eHh4gICAgIiIiIiQkJCQmJiYmKCgoKCoqKioqLCwsLC4uLi4wMDAwMjIyMjQ0NDQ2NjY2ODg4ODo6Ojo8PDw8Pj4+Pj///////////8AAAA8TEFNRTMuMTAwBEgAAAAAAAAAABUgJAMGQQABmgAACYcyc8XYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU='
+        };
+        
         // Initialize sounds after user interaction
         const initSounds = () => {
             if (!sounds.match) {
-                sounds.match = new Audio('/sounds/match.mp3');
-                sounds.wrong = new Audio('/sounds/wrong.mp3');
-                sounds.levelUp = new Audio('/sounds/levelup.mp3');
+                sounds.match = new Audio(audioData.match);
+                sounds.wrong = new Audio(audioData.wrong);
+                sounds.levelUp = new Audio(audioData.levelUp);
                 
                 // Preload sounds
                 sounds.match.load();
                 sounds.wrong.load();
                 sounds.levelUp.load();
+                
+                // Play and immediately pause to initialize audio context
+                const initSound = () => {
+                    sounds.match.volume = 0;
+                    sounds.match.play().then(() => {
+                        sounds.match.pause();
+                        sounds.match.currentTime = 0;
+                        sounds.match.volume = 1;
+                    }).catch(e => console.log('Could not initialize audio:', e));
+                };
+                
+                // Try to initialize
+                initSound();
             }
         };
         
