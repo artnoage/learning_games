@@ -131,13 +131,13 @@ button:hover {
     background-color: #c0392b;
 }
 
-#add-pair {
+#add-pair, .add-pair {
     background-color: #9b59b6;
     margin-bottom: 20px;
     width: 100%;
 }
 
-#add-pair:hover {
+#add-pair:hover, .add-pair:hover {
     background-color: #8e44ad;
 }
 
