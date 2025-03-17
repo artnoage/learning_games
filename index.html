@@ -6,49 +6,64 @@
     <title>Memory Pairs Game</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Vue.js CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
-    <div class="container">
+    <div id="app" class="container">
         <h1>Memory Pairs Game</h1>
         
-        <div class="setup-area">
+        <div v-if="!gameStarted" class="setup-area">
             <div class="setup-layout">
                 <div class="game-intro">
                     <h2>How to Play</h2>
                     <ol>
                         <li>Create word pairs on the right panel</li>
                         <li>Click "Start Game" when ready</li>
-                        <li>Memorize the word pairs shown for 5 seconds</li>
+                        <li>Memorize the word pairs shown for {{ memorizationTime }} seconds</li>
                         <li>After cards flip, find matching pairs</li>
                         <li>Match all pairs to win!</li>
                     </ol>
                     <div class="controls">
-                        <button type="button" id="load-defaults">Load Default Pairs</button>
-                        <button type="button" id="start-game">Start Game</button>
+                        <button type="button" @click="loadDefaultPairs">Load Default Pairs</button>
+                        <button type="button" @click="startGame">Start Game</button>
                     </div>
                 </div>
                 
                 <div class="pairs-section">
                     <h2>Create Your Pairs</h2>
                     <div class="pair-inputs">
-                        <div class="pair">
-                            <input type="text" class="word1" placeholder="Word 1">
-                            <input type="text" class="word2" placeholder="Word 2">
-                            <button type="button" class="remove-pair">✕</button>
+                        <div v-for="(pair, index) in wordPairs" :key="index" class="pair">
+                            <input type="text" v-model="pair.word1" placeholder="Word 1">
+                            <input type="text" v-model="pair.word2" placeholder="Word 2">
+                            <button type="button" @click="removePair(index)" class="remove-pair">✕</button>
                         </div>
                     </div>
-                    <button type="button" id="add-pair">Add Another Pair</button>
+                    <button type="button" @click="addPair" class="add-pair">Add Another Pair</button>
                 </div>
             </div>
         </div>
 
-        <div class="game-area hidden">
+        <div v-else class="game-area">
             <div class="game-info">
-                <div class="timer">Time: <span id="time">0</span></div>
-                <div class="matches">Matches: <span id="matches">0</span>/<span id="total-pairs">0</span></div>
+                <div class="timer">Time: <span>{{ timer }}</span></div>
+                <div class="matches">Matches: <span>{{ matchedPairs }}</span>/<span>{{ totalPairs }}</span></div>
             </div>
-            <div class="cards-container"></div>
-            <button type="button" id="restart-game">Restart Game</button>
+            <div class="cards-container">
+                <div 
+                    v-for="(card, index) in cards" 
+                    :key="index" 
+                    class="card" 
+                    :class="{ 'flipped': card.isFlipped, 'matched': card.isMatched }"
+                    @click="flipCard(card)"
+                >
+                    <div class="card-inner">
+                        <div class="card-front"></div>
+                        <div class="card-back">{{ card.word }}</div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" @click="restartGame" class="restart-game">Restart Game</button>
         </div>
     </div>
     

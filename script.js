@@ -1,310 +1,227 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
-    const setupArea = document.querySelector('.setup-area');
-    const gameArea = document.querySelector('.game-area');
-    const pairInputs = document.querySelector('.pair-inputs');
-    const addPairBtn = document.getElementById('add-pair');
-    const loadDefaultsBtn = document.getElementById('load-defaults');
-    const startGameBtn = document.getElementById('start-game');
-    const restartGameBtn = document.getElementById('restart-game');
-    const cardsContainer = document.querySelector('.cards-container');
-    const timeDisplay = document.getElementById('time');
-    const matchesDisplay = document.getElementById('matches');
-    const totalPairsDisplay = document.getElementById('total-pairs');
+// Vue.js application
+const { createApp, ref, computed, onMounted } = Vue;
 
-    // Game variables
-    let pairs = [];
-    let cards = [];
-    let flippedCards = [];
-    let matchedPairs = 0;
-    let timer;
-    let seconds = 0;
-    let gameStarted = false;
-    let memorizationTime = 5; // seconds to memorize cards
-
-    // Add event listeners
-    addPairBtn.addEventListener('click', addPairInput);
-    loadDefaultsBtn.addEventListener('click', loadDefaultPairs);
-    startGameBtn.addEventListener('click', startGame);
-    restartGameBtn.addEventListener('click', restartGame);
-    
-    // Add first pair input if none exists
-    if (pairInputs.children.length === 0) {
-        addPairInput();
-    }
-    
-    // Add event listeners to existing remove buttons
-    document.querySelectorAll('.remove-pair').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const pairDiv = this.parentElement;
-            if (pairInputs.children.length > 1) {
-                pairInputs.removeChild(pairDiv);
-            }
+createApp({
+    setup() {
+        // Game state
+        const gameStarted = ref(false);
+        const memorizationPhase = ref(false);
+        const memorizationTime = ref(5);
+        const timer = ref(0);
+        const timerInterval = ref(null);
+        const matchedPairs = ref(0);
+        const flippedCards = ref([]);
+        
+        // Word pairs
+        const wordPairs = ref([
+            { word1: '', word2: '' }
+        ]);
+        
+        // Cards
+        const cards = ref([]);
+        
+        // Computed properties
+        const totalPairs = computed(() => {
+            return wordPairs.value.filter(pair => 
+                pair.word1.trim() !== '' && pair.word2.trim() !== ''
+            ).length;
         });
-    });
-
-    // Load default pairs from JSON file
-    async function loadDefaultPairs() {
-        try {
-            const response = await fetch('default_pairs.json');
-            if (!response.ok) {
-                throw new Error('Failed to load default pairs');
+        
+        // Methods
+        const addPair = () => {
+            wordPairs.value.push({ word1: '', word2: '' });
+        };
+        
+        const removePair = (index) => {
+            if (wordPairs.value.length > 1) {
+                wordPairs.value.splice(index, 1);
             }
-            const defaultPairs = await response.json();
-            
-            // Clear existing pairs
-            pairInputs.innerHTML = '';
-            
-            // Add default pairs to the UI
-            defaultPairs.forEach(pair => {
-                const pairDiv = document.createElement('div');
-                pairDiv.className = 'pair';
-                pairDiv.innerHTML = `
-                    <input type="text" class="word1" placeholder="Word 1" value="${pair[0]}">
-                    <input type="text" class="word2" placeholder="Word 2" value="${pair[1]}">
-                    <button class="remove-pair">✕</button>
-                `;
-                pairInputs.appendChild(pairDiv);
+        };
+        
+        const loadDefaultPairs = async () => {
+            try {
+                const response = await fetch('default_pairs.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load default pairs');
+                }
+                const defaultPairs = await response.json();
                 
-                // Add event listener to remove button
-                const removeBtn = pairDiv.querySelector('.remove-pair');
-                removeBtn.addEventListener('click', function() {
-                    if (pairInputs.children.length > 1) {
-                        pairInputs.removeChild(pairDiv);
-                    }
-                });
+                // Clear existing pairs and add default pairs
+                wordPairs.value = defaultPairs.map(pair => ({
+                    word1: pair[0],
+                    word2: pair[1]
+                }));
+            } catch (error) {
+                console.error('Error loading default pairs:', error);
+                alert('Failed to load default pairs.');
+            }
+        };
+        
+        const startGame = () => {
+            // Filter valid pairs
+            const validPairs = wordPairs.value.filter(pair => 
+                pair.word1.trim() !== '' && pair.word2.trim() !== ''
+            );
+            
+            // Check if we have at least 2 pairs
+            if (validPairs.length < 2) {
+                alert('Please add at least 2 valid pairs to start the game.');
+                return;
+            }
+            
+            // Reset game state
+            matchedPairs.value = 0;
+            flippedCards.value = [];
+            
+            // Create cards
+            createCards(validPairs);
+            
+            // Start game
+            gameStarted.value = true;
+            memorizationPhase.value = true;
+            
+            // Start memorization timer
+            timer.value = memorizationTime.value;
+            
+            timerInterval.value = setInterval(() => {
+                timer.value--;
+                
+                if (timer.value <= 0) {
+                    clearInterval(timerInterval.value);
+                    hideAllCards();
+                    startGameTimer();
+                }
+            }, 1000);
+        };
+        
+        const createCards = (validPairs) => {
+            // Create flat array of all words
+            const allWords = [];
+            validPairs.forEach(pair => {
+                allWords.push(pair.word1, pair.word2);
             });
-        } catch (error) {
-            console.error('Error loading default pairs:', error);
-            alert('Failed to load default pairs. Using empty pairs instead.');
-            // Add a single empty pair if loading fails
-            addPairInput();
-        }
-    }
-    
-    // Add a new pair input
-    function addPairInput() {
-        const pairDiv = document.createElement('div');
-        pairDiv.className = 'pair';
-        pairDiv.innerHTML = `
-            <input type="text" class="word1" placeholder="Word 1">
-            <input type="text" class="word2" placeholder="Word 2">
-            <button type="button" class="remove-pair">✕</button>
-        `;
-        pairInputs.appendChild(pairDiv);
-
-        // Add event listener to remove button
-        const removeBtn = pairDiv.querySelector('.remove-pair');
-        removeBtn.addEventListener('click', () => {
-            if (pairInputs.children.length > 1) {
-                pairInputs.removeChild(pairDiv);
-            }
-        });
-    }
-
-    // Start the game
-    function startGame() {
-        // Collect pairs from inputs
-        pairs = [];
-        const pairElements = pairInputs.querySelectorAll('.pair');
-        
-        pairElements.forEach(pair => {
-            const word1 = pair.querySelector('.word1').value.trim();
-            const word2 = pair.querySelector('.word2').value.trim();
             
-            if (word1 && word2) {
-                pairs.push([word1, word2]);
-            }
-        });
-
-        // Check if we have at least 2 pairs
-        if (pairs.length < 2) {
-            alert('Please add at least 2 valid pairs to start the game.');
-            return;
-        }
-
-        // Update total pairs display
-        totalPairsDisplay.textContent = pairs.length;
-        matchesDisplay.textContent = '0';
-        matchedPairs = 0;
-
-        // Hide setup area and show game area
-        setupArea.classList.add('hidden');
-        gameArea.classList.remove('hidden');
-
-        // Create cards
-        createCards();
-
-        // Show all cards for memorization
-        showAllCards();
-
-        // Start timer for memorization phase
-        seconds = memorizationTime;
-        timeDisplay.textContent = seconds;
-        
-        timer = setInterval(() => {
-            seconds--;
-            timeDisplay.textContent = seconds;
+            // Shuffle the words
+            const shuffledWords = shuffleArray([...allWords]);
             
-            if (seconds <= 0) {
-                clearInterval(timer);
-                hideAllCards();
-                startGameTimer();
-            }
-        }, 1000);
-    }
-
-    // Create cards from pairs
-    function createCards() {
-        cardsContainer.innerHTML = '';
-        cards = [];
-        flippedCards = [];
-        
-        // Create flat array of all words
-        const allWords = [];
-        pairs.forEach(pair => {
-            allWords.push(...pair);
-        });
-        
-        // Shuffle the words
-        const shuffledWords = shuffleArray([...allWords]);
-        
-        // Create card elements
-        shuffledWords.forEach(word => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="card-inner">
-                    <div class="card-front"></div>
-                    <div class="card-back">${word}</div>
-                </div>
-            `;
-            cardsContainer.appendChild(card);
-            
-            // Store card data
-            const cardData = {
-                element: card,
+            // Create card objects
+            cards.value = shuffledWords.map(word => ({
                 word: word,
-                isFlipped: false,
+                isFlipped: true, // Start flipped for memorization
                 isMatched: false
-            };
+            }));
+        };
+        
+        const hideAllCards = () => {
+            cards.value.forEach(card => {
+                card.isFlipped = false;
+            });
+            memorizationPhase.value = false;
+        };
+        
+        const startGameTimer = () => {
+            timer.value = 0;
             
-            cards.push(cardData);
+            timerInterval.value = setInterval(() => {
+                timer.value++;
+            }, 1000);
+        };
+        
+        const flipCard = (card) => {
+            // Ignore if in memorization phase, card is already flipped or matched, or two cards are already flipped
+            if (memorizationPhase.value || card.isFlipped || card.isMatched || flippedCards.value.length >= 2) {
+                return;
+            }
             
-            // Add click event
-            card.addEventListener('click', () => flipCard(cardData));
-        });
-    }
-
-    // Show all cards for memorization
-    function showAllCards() {
-        cards.forEach(card => {
-            card.element.classList.add('flipped');
+            // Flip the card
             card.isFlipped = true;
-        });
-        gameStarted = false;
-    }
-
-    // Hide all cards to start the game
-    function hideAllCards() {
-        cards.forEach(card => {
-            card.element.classList.remove('flipped');
-            card.isFlipped = false;
-        });
-        gameStarted = true;
-    }
-
-    // Start the game timer
-    function startGameTimer() {
-        seconds = 0;
-        timeDisplay.textContent = seconds;
-        
-        timer = setInterval(() => {
-            seconds++;
-            timeDisplay.textContent = seconds;
-        }, 1000);
-    }
-
-    // Flip a card
-    function flipCard(card) {
-        // Ignore if game hasn't started, card is already flipped or matched, or two cards are already flipped
-        if (!gameStarted || card.isFlipped || card.isMatched || flippedCards.length >= 2) {
-            return;
-        }
-        
-        // Flip the card
-        card.element.classList.add('flipped');
-        card.isFlipped = true;
-        flippedCards.push(card);
-        
-        // Check for a match if two cards are flipped
-        if (flippedCards.length === 2) {
-            setTimeout(checkForMatch, 1000);
-        }
-    }
-
-    // Check if the two flipped cards are a match
-    function checkForMatch() {
-        const [card1, card2] = flippedCards;
-        
-        // Check if the words form a pair
-        let isMatch = false;
-        for (const pair of pairs) {
-            if ((card1.word === pair[0] && card2.word === pair[1]) || 
-                (card1.word === pair[1] && card2.word === pair[0])) {
-                isMatch = true;
-                break;
-            }
-        }
-        
-        if (isMatch) {
-            // Mark cards as matched
-            card1.isMatched = true;
-            card2.isMatched = true;
-            card1.element.classList.add('matched');
-            card2.element.classList.add('matched');
+            flippedCards.value.push(card);
             
-            // Update matches count
-            matchedPairs++;
-            matchesDisplay.textContent = matchedPairs;
-            
-            // Check if game is complete
-            if (matchedPairs === pairs.length) {
-                gameOver();
+            // Check for a match if two cards are flipped
+            if (flippedCards.value.length === 2) {
+                setTimeout(checkForMatch, 1000);
             }
-        } else {
-            // Flip cards back
-            card1.element.classList.remove('flipped');
-            card2.element.classList.remove('flipped');
-            card1.isFlipped = false;
-            card2.isFlipped = false;
-        }
+        };
         
-        // Clear flipped cards array
-        flippedCards = [];
+        const checkForMatch = () => {
+            const [card1, card2] = flippedCards.value;
+            
+            // Check if the words form a pair
+            let isMatch = false;
+            for (const pair of wordPairs.value) {
+                if ((card1.word === pair.word1 && card2.word === pair.word2) || 
+                    (card1.word === pair.word2 && card2.word === pair.word1)) {
+                    isMatch = true;
+                    break;
+                }
+            }
+            
+            if (isMatch) {
+                // Mark cards as matched
+                card1.isMatched = true;
+                card2.isMatched = true;
+                
+                // Update matches count
+                matchedPairs.value++;
+                
+                // Check if game is complete
+                if (matchedPairs.value === totalPairs.value) {
+                    gameOver();
+                }
+            } else {
+                // Flip cards back
+                setTimeout(() => {
+                    card1.isFlipped = false;
+                    card2.isFlipped = false;
+                }, 500);
+            }
+            
+            // Clear flipped cards array
+            flippedCards.value = [];
+        };
+        
+        const gameOver = () => {
+            clearInterval(timerInterval.value);
+            setTimeout(() => {
+                alert(`Congratulations! You completed the game in ${timer.value} seconds!`);
+            }, 500);
+        };
+        
+        const restartGame = () => {
+            clearInterval(timerInterval.value);
+            gameStarted.value = false;
+            memorizationPhase.value = false;
+        };
+        
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+        
+        // Load default pairs on mount (optional)
+        onMounted(() => {
+            // Uncomment to load default pairs on startup
+            // loadDefaultPairs();
+        });
+        
+        return {
+            gameStarted,
+            memorizationPhase,
+            memorizationTime,
+            timer,
+            matchedPairs,
+            totalPairs,
+            wordPairs,
+            cards,
+            addPair,
+            removePair,
+            loadDefaultPairs,
+            startGame,
+            flipCard,
+            restartGame
+        };
     }
-
-    // Game over
-    function gameOver() {
-        clearInterval(timer);
-        setTimeout(() => {
-            alert(`Congratulations! You completed the game in ${seconds} seconds!`);
-        }, 500);
-    }
-
-    // Restart the game
-    function restartGame() {
-        clearInterval(timer);
-        setupArea.classList.remove('hidden');
-        gameArea.classList.add('hidden');
-    }
-
-    // Utility function to shuffle an array
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-});
+}).mount('#app');

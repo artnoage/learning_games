@@ -249,7 +249,7 @@ button:hover {
     background-image: linear-gradient(135deg, #2ecc71, #27ae60);
 }
 
-#restart-game {
+#restart-game, .restart-game {
     display: block;
     margin: 0 auto;
     padding: 15px 30px;
