@@ -42,4 +42,8 @@ def get_default_pairs():
 
 if __name__ == '__main__':
     print("Memory Game server running at http://localhost:8001/")
+    # Suppress the development server warning
+    import warnings
+    from werkzeug.serving import run_simple
+    warnings.filterwarnings('ignore', '.*This is a development server.*')
     app.run(debug=True, port=8001)
