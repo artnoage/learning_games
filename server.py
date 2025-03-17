@@ -42,14 +42,4 @@ def get_default_pairs():
 
 if __name__ == '__main__':
     print("Memory Game server running at http://localhost:8001/")
-    # Suppress the development server warning
-    import warnings
-    from werkzeug.serving import run_simple
-    warnings.filterwarnings('ignore', '.*This is a development server.*')
-    
-    # Create a custom CLI to avoid the warning message
-    import sys
-    from flask.cli import ScriptInfo
-    cli = ScriptInfo(create_app=lambda: app)
-    from werkzeug.serving import run_simple
-    run_simple('127.0.0.1', 8001, app, use_reloader=True, use_debugger=True)
+    app.run(host='127.0.0.1', port=8001)
