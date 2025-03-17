@@ -46,4 +46,10 @@ if __name__ == '__main__':
     import warnings
     from werkzeug.serving import run_simple
     warnings.filterwarnings('ignore', '.*This is a development server.*')
-    app.run(debug=True, port=8001)
+    
+    # Create a custom CLI to avoid the warning message
+    import sys
+    from flask.cli import ScriptInfo
+    cli = ScriptInfo(create_app=lambda: app)
+    from werkzeug.serving import run_simple
+    run_simple('127.0.0.1', 8001, app, use_reloader=True, use_debugger=True)
