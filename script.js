@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Vue version:', Vue.version);
     const { createApp, ref, computed, onMounted } = Vue;
 
-    createApp({
+    const app = createApp({
     setup() {
         // Game state
         const gameStarted = ref(false);
@@ -50,20 +50,56 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const loadDefaultPairs = async () => {
             try {
-                const response = await fetch('default_pairs.json');
-                if (!response.ok) {
-                    throw new Error('Failed to load default pairs');
+                console.log('Loading default pairs...');
+                let defaultPairs;
+                
+                try {
+                    // First try to load from the JSON file
+                    const response = await fetch('default_pairs.json');
+                    if (!response.ok) {
+                        throw new Error('Failed to load from JSON file');
+                    }
+                    defaultPairs = await response.json();
+                    console.log('Loaded pairs from JSON file:', defaultPairs);
+                } catch (jsonError) {
+                    console.warn('Could not load from JSON, trying API endpoint:', jsonError);
+                    // Fallback to API endpoint
+                    const apiResponse = await fetch('/api/default-pairs');
+                    if (!apiResponse.ok) {
+                        throw new Error('Failed to load from API');
+                    }
+                    defaultPairs = await apiResponse.json();
+                    console.log('Loaded pairs from API:', defaultPairs);
                 }
-                const defaultPairs = await response.json();
+                
+                if (!Array.isArray(defaultPairs) || defaultPairs.length === 0) {
+                    throw new Error('Invalid default pairs data');
+                }
                 
                 // Clear existing pairs and add default pairs
                 wordPairs.value = defaultPairs.map(pair => ({
                     word1: pair[0],
                     word2: pair[1]
                 }));
+                
+                console.log('Default pairs loaded successfully');
             } catch (error) {
                 console.error('Error loading default pairs:', error);
-                alert('Failed to load default pairs.');
+                alert('Failed to load default pairs: ' + error.message);
+                
+                // Fallback to hardcoded pairs
+                const hardcodedPairs = [
+                    ["Apple", "Orange"],
+                    ["Dog", "Cat"],
+                    ["Sun", "Moon"]
+                ];
+                
+                wordPairs.value = hardcodedPairs.map(pair => ({
+                    word1: pair[0],
+                    word2: pair[1]
+                }));
+                
+                console.log('Using hardcoded pairs as fallback');
             }
         };
         
@@ -211,10 +247,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return array;
         };
         
-        // Load default pairs on mount (optional)
+        // Load default pairs on mount
         onMounted(() => {
-            // Uncomment to load default pairs on startup
-            // loadDefaultPairs();
+            console.log('Vue component mounted');
+            // Load default pairs on startup
+            loadDefaultPairs();
         });
         
         return {
@@ -234,5 +271,14 @@ document.addEventListener('DOMContentLoaded', () => {
             restartGame
         };
     }
-    }).mount('#app');
+    });
+    
+    // Mount the app with error handling
+    try {
+        app.mount('#app');
+        console.log('Vue app mounted successfully');
+    } catch (error) {
+        console.error('Failed to mount Vue app:', error);
+        alert('Error: Failed to initialize the game. Please check the console for details.');
+    }
 });
