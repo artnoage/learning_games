@@ -41,16 +41,37 @@ function initializeApp() {
         const timerInterval = ref(null);
         const matchedPairs = ref(0);
         const flippedCards = ref([]);
+        const score = ref(0);
+        const highScores = ref(JSON.parse(localStorage.getItem('memoryGameHighScores') || '{}'));
+        
+        // Sound effects
+        const sounds = {
+            match: new Audio('/sounds/match.mp3'),
+            wrong: new Audio('/sounds/wrong.mp3'),
+            levelUp: new Audio('/sounds/levelup.mp3')
+        };
         
         // Game levels
         const levels = ref([
-            { id: 1, name: "Beginner", pairsCount: 4, memTime: 5 },
-            { id: 2, name: "Easy", pairsCount: 8, memTime: 10 },
-            { id: 3, name: "Medium", pairsCount: 12, memTime: 15 },
-            { id: 4, name: "Hard", pairsCount: 16, memTime: 20 },
-            { id: 5, name: "Expert", pairsCount: 20, memTime: 25 }
+            { id: 1, name: "Beginner", pairsCount: 4, memTime: 5, unlocked: true },
+            { id: 2, name: "Easy", pairsCount: 8, memTime: 10, unlocked: false },
+            { id: 3, name: "Medium", pairsCount: 12, memTime: 15, unlocked: false },
+            { id: 4, name: "Hard", pairsCount: 16, memTime: 20, unlocked: false },
+            { id: 5, name: "Expert", pairsCount: 20, memTime: 25, unlocked: false }
         ]);
         const currentLevel = ref(1);
+        
+        // Load unlocked levels from localStorage
+        try {
+            const unlockedLevels = JSON.parse(localStorage.getItem('memoryGameUnlockedLevels') || '{"1": true}');
+            levels.value.forEach(level => {
+                if (unlockedLevels[level.id]) {
+                    level.unlocked = true;
+                }
+            });
+        } catch (e) {
+            console.error('Error loading unlocked levels:', e);
+        }
         
         // Word pairs
         const wordPairs = ref([
@@ -215,6 +236,12 @@ function initializeApp() {
             const currentLevelObj = levels.value.find(l => l.id === currentLevel.value);
             const requiredPairs = currentLevelObj ? currentLevelObj.pairsCount : 2;
             
+            // Check if level is unlocked
+            if (currentLevelObj && !currentLevelObj.unlocked) {
+                alert(`Level ${currentLevel.value} is locked. Complete the previous level first.`);
+                return;
+            }
+            
             // Check if we have enough pairs for the current level
             if (validPairs.length < requiredPairs) {
                 alert(`Level ${currentLevel.value} requires at least ${requiredPairs} valid pairs. Please add more pairs or choose a lower level.`);
@@ -227,6 +254,7 @@ function initializeApp() {
             // Reset game state
             matchedPairs.value = 0;
             flippedCards.value = [];
+            score.value = 0;
             
             // Create cards
             createCards(gamePairs);
@@ -319,30 +347,111 @@ function initializeApp() {
                 card1.isMatched = true;
                 card2.isMatched = true;
                 
-                // Update matches count
+                // Update matches count and score
                 matchedPairs.value++;
+                score.value += 1;
+                
+                // Play match sound
+                sounds.match.play().catch(e => console.log('Error playing sound:', e));
+                
+                // Add visual feedback
+                addMatchAnimation(card1, card2);
                 
                 // Check if game is complete
                 if (matchedPairs.value === totalPairs.value) {
                     gameOver();
                 }
             } else {
-                // Flip cards back
+                // Flip cards back and decrease score
+                score.value = Math.max(0, score.value - 1); // Don't go below 0
+                
+                // Play wrong sound
+                sounds.wrong.play().catch(e => console.log('Error playing sound:', e));
+                
+                // Add visual feedback for wrong match
+                addWrongAnimation(card1, card2);
+                
                 setTimeout(() => {
                     card1.isFlipped = false;
                     card2.isFlipped = false;
-                }, 500);
+                }, 1000);
             }
             
             // Clear flipped cards array
             flippedCards.value = [];
         };
         
+        const addMatchAnimation = (card1, card2) => {
+            // Add a CSS class for animation
+            const elements = document.querySelectorAll('.card.flipped.matched');
+            elements.forEach(el => {
+                el.classList.add('match-animation');
+                setTimeout(() => el.classList.remove('match-animation'), 1000);
+            });
+        };
+        
+        const addWrongAnimation = (card1, card2) => {
+            // Add a CSS class for animation
+            const elements = document.querySelectorAll('.card.flipped:not(.matched)');
+            elements.forEach(el => {
+                el.classList.add('wrong-animation');
+                setTimeout(() => el.classList.remove('wrong-animation'), 1000);
+            });
+        };
+        
         const gameOver = () => {
             clearInterval(timerInterval.value);
-            setTimeout(() => {
-                alert(`Congratulations! You completed the game in ${timer.value} seconds!`);
-            }, 500);
+            
+            // Calculate final score based on time and level
+            const currentLevelObj = levels.value.find(l => l.id === currentLevel.value);
+            const timeBonus = Math.max(0, 100 - timer.value); // Faster completion = higher bonus
+            const finalScore = score.value + timeBonus + (currentLevel.value * 10);
+            
+            // Save high score if it's better than previous
+            if (!highScores.value[currentLevel.value] || finalScore > highScores.value[currentLevel.value]) {
+                highScores.value[currentLevel.value] = finalScore;
+                localStorage.setItem('memoryGameHighScores', JSON.stringify(highScores.value));
+            }
+            
+            // Check if player passed the level (more than half the maximum possible score)
+            const maxPossibleScore = currentLevelObj.pairsCount + 100 + (currentLevel.value * 10);
+            const passedLevel = finalScore > (maxPossibleScore / 2);
+            
+            // Unlock next level if passed and not already at max level
+            if (passedLevel && currentLevel.value < levels.value.length) {
+                const nextLevel = levels.value.find(l => l.id === currentLevel.value + 1);
+                if (nextLevel && !nextLevel.unlocked) {
+                    nextLevel.unlocked = true;
+                    
+                    // Save unlocked levels to localStorage
+                    const unlockedLevels = {};
+                    levels.value.forEach(level => {
+                        if (level.unlocked) unlockedLevels[level.id] = true;
+                    });
+                    localStorage.setItem('memoryGameUnlockedLevels', JSON.stringify(unlockedLevels));
+                    
+                    // Play level up sound
+                    sounds.levelUp.play().catch(e => console.log('Error playing sound:', e));
+                    
+                    setTimeout(() => {
+                        alert(`Congratulations! You completed level ${currentLevel.value} with a score of ${finalScore}!\n\nYou've unlocked level ${currentLevel.value + 1}!`);
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        alert(`Congratulations! You completed level ${currentLevel.value} with a score of ${finalScore}!`);
+                    }, 500);
+                }
+            } else if (currentLevel.value === levels.value.length && passedLevel) {
+                // Player beat the final level
+                setTimeout(() => {
+                    alert(`Amazing! You've mastered the final level with a score of ${finalScore}!\n\nYou've completed all levels of the Memory Pairs Game!`);
+                }, 500);
+            } else {
+                // Player didn't pass the level
+                setTimeout(() => {
+                    alert(`Game over! Your score: ${finalScore}\n\nYou need at least ${Math.ceil(maxPossibleScore / 2)} points to advance to the next level. Try again!`);
+                }, 500);
+            }
         };
         
         const restartGame = () => {
@@ -377,6 +486,8 @@ function initializeApp() {
             cards,
             levels,
             currentLevel,
+            score,
+            highScores,
             addPair,
             removePair,
             loadDefaultPairs,

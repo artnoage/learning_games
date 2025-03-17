@@ -17,6 +17,14 @@
             <div class="setup-layout">
                 <div class="game-intro">
                     <h2>How to Play</h2>
+                    <div class="high-scores" v-if="Object.keys(highScores).length > 0">
+                        <h3>High Scores</h3>
+                        <ul>
+                            <li v-for="(score, levelId) in highScores" :key="levelId">
+                                Level {{ levelId }}: {{ score }}
+                            </li>
+                        </ul>
+                    </div>
                     <ol>
                         <li>Create word pairs on the right panel</li>
                         <li>Click "Start Game" when ready</li>
@@ -28,8 +36,8 @@
                         <div class="level-selector">
                             <label for="level">Level:</label>
                             <select id="level" v-model="currentLevel">
-                                <option v-for="level in levels" :key="level.id" :value="level.id">
-                                    {{ level.name }} ({{ level.pairsCount }} pairs)
+                                <option v-for="level in levels" :key="level.id" :value="level.id" :disabled="!level.unlocked">
+                                    {{ level.name }} ({{ level.pairsCount }} pairs) {{ !level.unlocked ? '🔒' : '' }}
                                 </option>
                             </select>
                         </div>
@@ -59,6 +67,7 @@
             <div class="game-info">
                 <div class="timer">Time: <span>{{ timer }}</span></div>
                 <div class="matches">Matches: <span>{{ matchedPairs }}</span>/<span>{{ totalPairs }}</span></div>
+                <div class="score">Score: <span>{{ score }}</span></div>
             </div>
             <div class="cards-container">
                 <div 

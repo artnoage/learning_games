@@ -200,6 +200,33 @@ button:hover {
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
+.score {
+    color: #e67e22;
+}
+
+.high-scores {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.high-scores h3 {
+    color: #e67e22;
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+}
+
+.high-scores ul {
+    list-style-type: none;
+}
+
+.high-scores li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
 .cards-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -273,6 +300,34 @@ button:hover {
 .card.matched .card-back {
     background-color: #2ecc71;
     background-image: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+@keyframes matchPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(46, 204, 113, 0.8); }
+    100% { transform: scale(1); }
+}
+
+.match-animation {
+    animation: matchPulse 0.6s ease;
+}
+
+@keyframes wrongShake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-10px); }
+    80% { transform: translateX(10px); }
+    100% { transform: translateX(0); }
+}
+
+.wrong-animation {
+    animation: wrongShake 0.5s ease;
+    background-color: #e74c3c !important;
+}
+
+.wrong-animation .card-back {
+    background-image: linear-gradient(135deg, #e74c3c, #c0392b) !important;
 }
 
 #restart-game, .restart-game {
