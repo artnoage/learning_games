@@ -42,4 +42,4 @@ def get_default_pairs():
 
 if __name__ == '__main__':
     print("Memory Game server running at http://localhost:8001/")
-    app.run(debug=True)
+    app.run(debug=True, port=8001)
