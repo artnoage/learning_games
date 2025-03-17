@@ -69,7 +69,7 @@
                 <div class="matches">Matches: <span>{{ matchedPairs }}</span>/<span>{{ totalPairs }}</span></div>
                 <div class="score">Score: <span>{{ score }}</span></div>
             </div>
-            <div class="cards-container">
+            <div class="cards-container" :style="gridStyle">
                 <div 
                     v-for="(card, index) in cards" 
                     :key="index" 

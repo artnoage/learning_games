@@ -53,9 +53,9 @@ function initializeApp() {
         
         // Sound file paths
         const soundPaths = {
-            match: '/sounds/match.wav',
-            wrong: '/sounds/wrong.wav',
-            levelUp: '/sounds/levelup.wav'
+            match: '/sounds/match.mp3',
+            wrong: '/sounds/wrong.mp3',
+            levelUp: '/sounds/levelup.mp3'
         };
         
         // Initialize sounds after user interaction
@@ -536,6 +536,7 @@ function initializeApp() {
             currentLevel,
             score,
             highScores,
+            gridStyle,
             addPair,
             removePair,
             loadDefaultPairs,
