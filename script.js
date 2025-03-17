@@ -319,6 +319,21 @@ function initializeApp() {
             }, 1000);
         };
         
+        // Grid style for cards layout
+        const gridStyle = computed(() => {
+            const totalCards = cards.value.length;
+            if (totalCards === 0) return {};
+            
+            // Calculate optimal grid dimensions (as close to square as possible)
+            const columns = Math.ceil(Math.sqrt(totalCards));
+            
+            return {
+                'display': 'grid',
+                'grid-template-columns': `repeat(${columns}, 1fr)`,
+                'grid-gap': '10px'
+            };
+        });
+        
         const createCards = (validPairs) => {
             // Create flat array of all words
             const allWords = [];
