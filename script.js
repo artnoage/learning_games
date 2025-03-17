@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameArea = document.querySelector('.game-area');
     const pairInputs = document.querySelector('.pair-inputs');
     const addPairBtn = document.getElementById('add-pair');
+    const loadDefaultsBtn = document.getElementById('load-defaults');
     const startGameBtn = document.getElementById('start-game');
     const restartGameBtn = document.getElementById('restart-game');
     const cardsContainer = document.querySelector('.cards-container');
@@ -23,10 +24,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add event listeners
     addPairBtn.addEventListener('click', addPairInput);
+    loadDefaultsBtn.addEventListener('click', loadDefaultPairs);
     startGameBtn.addEventListener('click', startGame);
     restartGameBtn.addEventListener('click', restartGame);
+    
+    // Add first pair input if none exists
+    if (pairInputs.children.length === 0) {
+        addPairInput();
+    }
 
-    // Add first pair input
+    // Load default pairs from JSON file
+    async function loadDefaultPairs() {
+        try {
+            const response = await fetch('default_pairs.json');
+            if (!response.ok) {
+                throw new Error('Failed to load default pairs');
+            }
+            const defaultPairs = await response.json();
+            
+            // Clear existing pairs
+            pairInputs.innerHTML = '';
+            
+            // Add default pairs to the UI
+            defaultPairs.forEach(pair => {
+                const pairDiv = document.createElement('div');
+                pairDiv.className = 'pair';
+                pairDiv.innerHTML = `
+                    <input type="text" class="word1" placeholder="Word 1" value="${pair[0]}">
+                    <input type="text" class="word2" placeholder="Word 2" value="${pair[1]}">
+                    <button class="remove-pair">✕</button>
+                `;
+                pairInputs.appendChild(pairDiv);
+                
+                // Add event listener to remove button
+                const removeBtn = pairDiv.querySelector('.remove-pair');
+                removeBtn.addEventListener('click', () => {
+                    if (pairInputs.children.length > 1) {
+                        pairInputs.removeChild(pairDiv);
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Error loading default pairs:', error);
+            alert('Failed to load default pairs. Using empty pairs instead.');
+            // Add a single empty pair if loading fails
+            addPairInput();
+        }
+    }
+    
+    // Add a new pair input
     function addPairInput() {
         const pairDiv = document.createElement('div');
         pairDiv.className = 'pair';
