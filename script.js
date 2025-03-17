@@ -1,13 +1,33 @@
 // Vue.js application
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing Vue app');
+// Wait for Vue to load
+window.onload = () => {
+    console.log('Window loaded, checking for Vue');
     
-    if (typeof Vue === 'undefined') {
-        console.error('Vue is not defined! Make sure the Vue script is loaded correctly.');
-        alert('Error: Vue.js failed to load. Please check the console for details.');
-        return;
+    // Try multiple times to initialize Vue (in case it loads with delay)
+    let attempts = 0;
+    const maxAttempts = 5;
+    
+    function initVue() {
+        console.log(`Attempt ${attempts + 1} to initialize Vue`);
+        
+        if (typeof Vue !== 'undefined') {
+            console.log('Vue is defined, initializing app');
+            initializeApp();
+        } else if (attempts < maxAttempts) {
+            console.log('Vue not defined yet, trying again in 500ms');
+            attempts++;
+            setTimeout(initVue, 500);
+        } else {
+            console.error('Vue is not defined after multiple attempts! Make sure the Vue script is loaded correctly.');
+            alert('Error: Vue.js failed to load. Please check the console for details.');
+        }
     }
     
+    // Start the initialization process
+    initVue();
+};
+
+function initializeApp() {
     console.log('Vue version:', Vue.version);
     const { createApp, ref, computed, onMounted } = Vue;
 
@@ -54,8 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 let defaultPairs;
                 
                 try {
-                    // First try to load from the JSON file
-                    const response = await fetch('default_pairs.json');
+                    // First try to load from the JSON file with explicit path
+                    const response = await fetch('./default_pairs.json');
                     if (!response.ok) {
                         throw new Error('Failed to load from JSON file');
                     }
@@ -64,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (jsonError) {
                     console.warn('Could not load from JSON, trying API endpoint:', jsonError);
                     // Fallback to API endpoint
-                    const apiResponse = await fetch('/api/default-pairs');
+                    const apiResponse = await fetch('./api/default-pairs');
                     if (!apiResponse.ok) {
                         throw new Error('Failed to load from API');
                     }
@@ -281,4 +301,4 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Failed to mount Vue app:', error);
         alert('Error: Failed to initialize the game. Please check the console for details.');
     }
-});
+}
