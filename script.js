@@ -1,7 +1,17 @@
 // Vue.js application
-const { createApp, ref, computed, onMounted } = Vue;
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing Vue app');
+    
+    if (typeof Vue === 'undefined') {
+        console.error('Vue is not defined! Make sure the Vue script is loaded correctly.');
+        alert('Error: Vue.js failed to load. Please check the console for details.');
+        return;
+    }
+    
+    console.log('Vue version:', Vue.version);
+    const { createApp, ref, computed, onMounted } = Vue;
 
-createApp({
+    createApp({
     setup() {
         // Game state
         const gameStarted = ref(false);
@@ -224,4 +234,5 @@ createApp({
             restartGame
         };
     }
-}).mount('#app');
+    }).mount('#app');
+});
