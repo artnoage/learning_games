@@ -25,8 +25,19 @@
                         <li>Match all pairs to win!</li>
                     </ol>
                     <div class="controls">
-                        <button type="button" @click="loadDefaultPairs">Load Default Pairs</button>
-                        <button type="button" @click="startGame">Start Game</button>
+                        <div class="level-selector">
+                            <label for="level">Level:</label>
+                            <select id="level" v-model="currentLevel">
+                                <option v-for="level in levels" :key="level.id" :value="level.id">
+                                    {{ level.name }} ({{ level.pairsCount }} pairs)
+                                </option>
+                            </select>
+                        </div>
+                        <div class="buttons-row">
+                            <button type="button" @click="loadDefaultPairs">Load Default Pairs</button>
+                            <button type="button" @click="loadCustomJson">Load Custom JSON</button>
+                            <button type="button" @click="startGame">Start Game</button>
+                        </div>
                     </div>
                 </div>
                 

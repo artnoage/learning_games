@@ -14,12 +14,26 @@ def serve_file(path):
 def get_default_pairs():
     # This is a fallback in case the JSON file can't be loaded directly
     default_pairs = [
-        ["Apple", "Orange"],
-        ["Dog", "Cat"],
-        ["Sun", "Moon"],
-        ["Book", "Page"],
-        ["Car", "Road"],
-        ["Coffee", "Tea"]
+        ["Hello", "Hallo"],
+        ["Goodbye", "Auf Wiedersehen"],
+        ["Thank you", "Danke"],
+        ["Please", "Bitte"],
+        ["Yes", "Ja"],
+        ["No", "Nein"],
+        ["Water", "Wasser"],
+        ["Bread", "Brot"],
+        ["Friend", "Freund"],
+        ["Family", "Familie"],
+        ["House", "Haus"],
+        ["Car", "Auto"],
+        ["Book", "Buch"],
+        ["Time", "Zeit"],
+        ["Day", "Tag"],
+        ["Night", "Nacht"],
+        ["Morning", "Morgen"],
+        ["Evening", "Abend"],
+        ["Love", "Liebe"],
+        ["Work", "Arbeit"]
     ]
     return jsonify(default_pairs)
 

@@ -42,6 +42,16 @@ function initializeApp() {
         const matchedPairs = ref(0);
         const flippedCards = ref([]);
         
+        // Game levels
+        const levels = ref([
+            { id: 1, name: "Beginner", pairsCount: 4, memTime: 5 },
+            { id: 2, name: "Easy", pairsCount: 8, memTime: 10 },
+            { id: 3, name: "Medium", pairsCount: 12, memTime: 15 },
+            { id: 4, name: "Hard", pairsCount: 16, memTime: 20 },
+            { id: 5, name: "Expert", pairsCount: 20, memTime: 25 }
+        ]);
+        const currentLevel = ref(1);
+        
         // Word pairs
         const wordPairs = ref([
             { word1: '', word2: '' }
@@ -102,6 +112,12 @@ function initializeApp() {
                     word2: pair[1]
                 }));
                 
+                // Limit pairs based on current level
+                const currentLevelObj = levels.value.find(l => l.id === currentLevel.value);
+                if (currentLevelObj && wordPairs.value.length > currentLevelObj.pairsCount) {
+                    wordPairs.value = wordPairs.value.slice(0, currentLevelObj.pairsCount);
+                }
+                
                 console.log('Default pairs loaded successfully');
             } catch (error) {
                 console.error('Error loading default pairs:', error);
@@ -109,9 +125,10 @@ function initializeApp() {
                 
                 // Fallback to hardcoded pairs
                 const hardcodedPairs = [
-                    ["Apple", "Orange"],
-                    ["Dog", "Cat"],
-                    ["Sun", "Moon"]
+                    ["Hello", "Hallo"],
+                    ["Thank you", "Danke"],
+                    ["Yes", "Ja"],
+                    ["No", "Nein"]
                 ];
                 
                 wordPairs.value = hardcodedPairs.map(pair => ({
@@ -123,28 +140,103 @@ function initializeApp() {
             }
         };
         
+        const loadCustomJson = async () => {
+            try {
+                // Create a file input element
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.json';
+                
+                // Handle file selection
+                fileInput.onchange = async (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    
+                    try {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            try {
+                                const customPairs = JSON.parse(e.target.result);
+                                
+                                if (!Array.isArray(customPairs) || customPairs.length === 0) {
+                                    throw new Error('Invalid JSON format. Expected an array of pairs.');
+                                }
+                                
+                                // Check if the format is correct (array of arrays with 2 elements each)
+                                const isValidFormat = customPairs.every(pair => 
+                                    Array.isArray(pair) && pair.length === 2 && 
+                                    typeof pair[0] === 'string' && typeof pair[1] === 'string'
+                                );
+                                
+                                if (!isValidFormat) {
+                                    throw new Error('Invalid JSON format. Expected an array of pairs [string, string].');
+                                }
+                                
+                                // Clear existing pairs and add custom pairs
+                                wordPairs.value = customPairs.map(pair => ({
+                                    word1: pair[0],
+                                    word2: pair[1]
+                                }));
+                                
+                                // Limit pairs based on current level
+                                const currentLevelObj = levels.value.find(l => l.id === currentLevel.value);
+                                if (currentLevelObj && wordPairs.value.length > currentLevelObj.pairsCount) {
+                                    wordPairs.value = wordPairs.value.slice(0, currentLevelObj.pairsCount);
+                                }
+                                
+                                console.log('Custom pairs loaded successfully');
+                            } catch (parseError) {
+                                console.error('Error parsing JSON:', parseError);
+                                alert('Failed to parse JSON: ' + parseError.message);
+                            }
+                        };
+                        reader.readAsText(file);
+                    } catch (fileError) {
+                        console.error('Error reading file:', fileError);
+                        alert('Failed to read file: ' + fileError.message);
+                    }
+                };
+                
+                // Trigger file selection dialog
+                fileInput.click();
+            } catch (error) {
+                console.error('Error loading custom JSON:', error);
+                alert('Failed to load custom JSON: ' + error.message);
+            }
+        };
+        
         const startGame = () => {
             // Filter valid pairs
             const validPairs = wordPairs.value.filter(pair => 
                 pair.word1.trim() !== '' && pair.word2.trim() !== ''
             );
             
-            // Check if we have at least 2 pairs
-            if (validPairs.length < 2) {
-                alert('Please add at least 2 valid pairs to start the game.');
+            // Get current level settings
+            const currentLevelObj = levels.value.find(l => l.id === currentLevel.value);
+            const requiredPairs = currentLevelObj ? currentLevelObj.pairsCount : 2;
+            
+            // Check if we have enough pairs for the current level
+            if (validPairs.length < requiredPairs) {
+                alert(`Level ${currentLevel.value} requires at least ${requiredPairs} valid pairs. Please add more pairs or choose a lower level.`);
                 return;
             }
+            
+            // Limit pairs to the current level's count
+            const gamePairs = validPairs.slice(0, requiredPairs);
             
             // Reset game state
             matchedPairs.value = 0;
             flippedCards.value = [];
             
             // Create cards
-            createCards(validPairs);
+            createCards(gamePairs);
             
             // Start game
             gameStarted.value = true;
             memorizationPhase.value = true;
+            
+            // Set memorization time based on level
+            memorizationTime.value = currentLevelObj ? currentLevelObj.memTime : 5;
             
             // Start memorization timer
             timer.value = memorizationTime.value;
@@ -283,9 +375,12 @@ function initializeApp() {
             totalPairs,
             wordPairs,
             cards,
+            levels,
+            currentLevel,
             addPair,
             removePair,
             loadDefaultPairs,
+            loadCustomJson,
             startGame,
             flipCard,
             restartGame

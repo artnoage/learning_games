@@ -69,6 +69,32 @@ h2 {
     margin-top: 30px;
 }
 
+.level-selector {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.level-selector label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.level-selector select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: white;
+    font-size: 16px;
+    min-width: 200px;
+}
+
+.buttons-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 .pair-inputs {
     margin-bottom: 20px;
     max-height: 400px;
