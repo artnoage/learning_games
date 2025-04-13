@@ -374,3 +374,263 @@ button:hover {
         font-size: 1.5rem;
     }
 }
+
+/* --- Main Menu Styles --- */
+.main-menu {
+    text-align: center;
+    background-color: white;
+    border-radius: 15px;
+    padding: 40px 30px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    margin: 30px auto;
+    max-width: 600px;
+}
+
+.header-area { /* Style for the wrapper */
+    display: flex;
+    /* Removed justify-content: space-between; */
+    align-items: center; /* Vertically center items */
+    max-width: 1200px; /* Match container width */
+    margin: 0 auto 30px auto; /* Center the header area itself and add bottom margin */
+    padding: 10px 0; /* Adjust padding */
+    border-bottom: 1px solid #eee; /* Optional separator */
+    gap: 20px; /* Increased gap slightly */
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+.header-area h1 {
+    margin-bottom: 0; /* Remove default bottom margin from h1 inside header */
+    /* Removed text-align: left; */
+    flex-grow: 1; /* Allow title to take available space if needed */
+}
+
+.external-link-button {
+    display: inline-flex; /* Use inline-flex for icon alignment */
+    align-items: center; /* Vertically align icon and text */
+    gap: 6px; /* Space between icon and text */
+    background-color: #95a5a6; /* Neutral color */
+    color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    white-space: nowrap; /* Prevent button text wrapping */
+}
+
+.external-link-button .button-icon {
+    /* Style for the SVG icon */
+    vertical-align: middle; /* Helps alignment */
+    margin-bottom: 1px; /* Fine-tune vertical position */
+}
+
+
+.external-link-button:hover {
+    background-color: #7f8c8d;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+
+.main-menu h2 {
+    margin-bottom: 30px;
+}
+
+.menu-button {
+    display: block;
+    width: 100%;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+/* --- General UI Elements --- */
+.back-button {
+    background-color: #7f8c8d;
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    font-size: 0.9rem;
+}
+
+.back-button:hover {
+    background-color: #6c7a7d;
+}
+
+button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.error-message {
+    color: #e74c3c;
+    background-color: #fbeaea;
+    border: 1px solid #e74c3c;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+/* --- Exercise Builder Styles --- */
+.exercise-builder {
+    background-color: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.exercise-setup {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input[type="text"],
+.form-group select,
+.form-group textarea { /* Added textarea */
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit; /* Ensure textarea uses the same font */
+}
+
+.form-group textarea {
+    resize: vertical; /* Allow vertical resize */
+    min-height: 60px; /* Minimum height */
+}
+
+
+.form-group select {
+     background-color: white; /* Ensure select background is white */
+}
+
+/* Removed .form-group-inline styles */
+
+.exercise-display {
+    margin-top: 20px;
+}
+
+.word-bank {
+    background-color: #ecf0f1;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid #ddd;
+}
+
+.word-bank strong {
+    display: block;
+    margin-bottom: 10px;
+    color: #34495e;
+}
+
+.word-bank ul {
+    list-style-type: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.word-bank li {
+    background-color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.sentence-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px; /* Gap between sentence parts and input */
+}
+
+.sentence-item span { /* Style for text parts */
+    line-height: 1.5; /* Ensure text aligns well with input */
+}
+
+.sentence-item input[type="text"] {
+    flex: 0 1 150px; /* Allow input to grow but have a base size */
+    margin: 0 5px; /* Add slight horizontal margin */
+    padding: 8px 10px; /* Smaller padding for inline input */
+    font-size: 1rem; /* Match surrounding text size */
+    text-align: center;
+    border-color: #bdc3c7;
+}
+
+.sentence-item input[type="text"]:focus {
+     border-color: #3498db;
+}
+
+.sentence-item input.correct {
+    border-color: #2ecc71;
+    background-color: #eafaf1;
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.sentence-item input.incorrect {
+    border-color: #e74c3c;
+    background-color: #fbeaea;
+    color: #c0392b;
+    font-weight: bold;
+}
+
+.feedback-tick, .feedback-cross {
+    font-size: 1.2rem;
+    margin-left: 10px;
+}
+
+.feedback-tick {
+    color: #2ecc71;
+}
+
+.feedback-cross {
+    color: #e74c3c;
+    font-size: 1rem; /* Make cross feedback slightly smaller */
+    font-style: italic;
+}
+
+.feedback-cross .correct-answer { /* Style for the correct answer text within the cross feedback */
+    font-size: 0.9em; /* Slightly smaller */
+    color: #555; /* Less prominent color */
+    font-style: normal; /* Override italic */
+    font-weight: normal; /* Override potential bold */
+}
+
+
+.exercise-score {
+    margin-top: 25px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    text-align: center;
+    color: #2c3e50;
+    background-color: #eafaf1;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #2ecc71;
+}

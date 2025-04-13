@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Pairs Game</title>
+    <title>Learning App</title> <!-- Changed Title -->
     <link rel="stylesheet" href="/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Vue.js CDN with specific version for stability -->
@@ -11,11 +11,32 @@
 </head>
 <body>
     <div id="app" class="container">
-        <h1>Memory Pairs Game</h1>
-        
-        <div v-if="!gameStarted" class="setup-area">
-            <div class="setup-layout">
-                <div class="game-intro">
+        <div class="header-area"> <!-- Added wrapper for title and external link -->
+            <h1>Learning App</h1>
+            <a href="https://www.metaskepsis.com" target="_blank" rel="noopener noreferrer" class="external-link-button">
+                <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16px" height="16px">
+                    <path d="M12 2C9.243 2 7 4.243 7 7c0 1.46.64 2.794 1.696 3.744C7.06 11.495 6 12.98 6 14.5c0 1.933 1.567 3.5 3.5 3.5h1c.276 0 .5.224.5.5s-.224.5-.5.5h-1C7.346 19 5 16.654 5 14.5 5 12.605 6.235 10.98 8.008 10.17C7.374 9.44 7 8.51 7 7.5 7 4.467 9.238 2 12 2s5 2.467 5 5.5c0 1.01-.374 1.94-.992 2.67C17.765 10.98 19 12.605 19 14.5c0 2.154-2.346 4.5-5.5 4.5h-1c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h1c1.933 0 3.5-1.567 3.5-3.5 0-1.52-.94-3.005-2.696-3.756C16.36 9.794 17 8.46 17 7c0-2.757-2.243-5-5-5zm-1 10h2v2h-2v-2zm-2-2h6v-2h-6v2zm2-4h2v2h-2V6z"/>
+                </svg>
+                Back to Metaskepsis
+            </a>
+        </div>
+
+        <!-- Main Menu -->
+        <div v-if="currentView === 'mainMenu'" class="main-menu">
+            <h2>Choose an Activity</h2>
+            <button @click="showMemoryGame" class="menu-button">Memory Pairs Game</button>
+            <button @click="showExerciseBuilder" class="menu-button">Exercise Builder</button>
+        </div>
+
+        <!-- Memory Pairs Game (Existing Content Wrapped) -->
+        <div v-if="currentView === 'memoryGame'">
+            <h2>Memory Pairs Game</h2>
+            <button @click="showMainMenu" class="back-button">Back to Menu</button>
+
+            <!-- Setup Area -->
+            <div v-if="!gameStarted" class="setup-area">
+                <div class="setup-layout">
+                    <div class="game-intro">
                     <h2>How to Play</h2>
                     <div class="high-scores" v-if="Object.keys(highScores).length > 0">
                         <h3>High Scores</h3>
@@ -44,11 +65,11 @@
                         <div class="buttons-row">
                             <button type="button" @click="loadDefaultPairs">Load Default Pairs</button>
                             <button type="button" @click="loadCustomJson">Load Custom JSON</button>
-                            <button type="button" @click="startGame">Start Game</button>
+                    <button type="button" @click="startGame">Start Game</button>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="pairs-section">
                     <h2>Create Your Pairs</h2>
                     <div class="pair-inputs">
@@ -61,19 +82,20 @@
                     <button type="button" @click="addPair" class="add-pair">Add Another Pair</button>
                 </div>
             </div>
-        </div>
+            </div> <!-- End Setup Area -->
 
-        <div v-else class="game-area">
-            <div class="game-info">
-                <div class="timer">Time: <span>{{ timer }}</span></div>
+            <!-- Game Area -->
+            <div v-else class="game-area">
+                <div class="game-info">
+                    <div class="timer">Time: <span>{{ timer }}</span></div>
                 <div class="matches">Matches: <span>{{ matchedPairs }}</span>/<span>{{ totalPairs }}</span></div>
                 <div class="score">Score: <span>{{ score }}</span></div>
             </div>
             <div class="cards-container" :style="gridStyle">
-                <div 
-                    v-for="(card, index) in cards" 
-                    :key="index" 
-                    class="card" 
+                <div
+                    v-for="(card, index) in cards"
+                    :key="index"
+                    class="card"
                     :class="{ 'flipped': card.isFlipped, 'matched': card.isMatched }"
                     @click="flipCard(card)"
                 >
@@ -84,9 +106,75 @@
                 </div>
             </div>
             <button type="button" @click="restartGame" class="restart-game">Restart Game</button>
-        </div>
-    </div>
-    
+            </div> <!-- End Game Area -->
+        </div> <!-- End Memory Game Section -->
+
+        <!-- Exercise Builder -->
+        <div v-if="currentView === 'exerciseBuilder'" class="exercise-builder">
+            <h2>Exercise Builder</h2>
+            <button @click="showMainMenu" class="back-button">Back to Menu</button>
+
+            <!-- Setup -->
+            <div class="exercise-setup">
+                 <p class="instructions">Enter a topic (e.g., "past tense verbs") or a list of words/phrases (one per line) you want to practice.</p>
+                <div class="form-group">
+                    <label for="topic">Topic or Words:</label> <!-- Changed Label -->
+                    <textarea id="topic" v-model="exerciseTopic" rows="3" placeholder="e.g., past tense verbs\nOR\neat\nrun\napple\n..."></textarea> <!-- Changed to textarea and updated placeholder -->
+                </div>
+                <div class="form-group"> <!-- Keep this div for language select -->
+                    <label for="language">Language:</label>
+                    <select id="language" v-model="exerciseLanguage">
+                        <option v-for="lang in availableLanguages" :key="lang.code" :value="lang.name">{{ lang.name }}</option>
+                    </select>
+                </div>
+                <!-- Removed sentence count and custom word bank inputs -->
+                <button @click="generateExercise" :disabled="isLoadingExercise || !exerciseTopic.trim()"> <!-- Simplified disabled condition -->
+                    {{ isLoadingExercise ? 'Generating...' : 'Generate Exercise' }}
+                </button>
+                <p v-if="exerciseError" class="error-message">{{ exerciseError }}</p>
+            </div>
+
+            <!-- Exercise Display -->
+            <div v-if="generatedExercise.sentences.length > 0 && !isLoadingExercise" class="exercise-display">
+                <h3>Complete the sentences:</h3>
+                <div class="word-bank">
+                    <strong>Word Bank:</strong>
+                    <ul>
+                        <li v-for="word in generatedExercise.word_bank" :key="word">{{ word }}</li>
+                    </ul>
+                </div>
+                <!-- UPDATED loop to handle segments -->
+                <div v-for="sentence in formattedSentences" :key="sentence.id" class="sentence-item">
+                    <!-- Loop through segments within each sentence -->
+                    <template v-for="(segment, segIndex) in sentence.segments" :key="segIndex">
+                        <!-- Display text segment -->
+                        <span v-if="segment.type === 'text'" v-html="segment.content"></span>
+                        <!-- Display input segment -->
+                        <input
+                            v-if="segment.type === 'input'"
+                            type="text"
+                            :placeholder="segment.placeholder"
+                            v-model="userAnswers[sentence.id][segment.gapIndex]"
+                            :class="{
+                                correct: exerciseResults[sentence.id]?.[segment.gapIndex] === true,
+                                incorrect: exerciseResults[sentence.id]?.[segment.gapIndex] === false
+                            }"
+                            :disabled="exerciseResults[sentence.id]?.[segment.gapIndex] !== null"
+                        >
+                        <!-- Display feedback per input -->
+                         <span v-if="segment.type === 'input' && exerciseResults[sentence.id]?.[segment.gapIndex] === true" class="feedback-tick">✔</span>
+                         <span v-if="segment.type === 'input' && exerciseResults[sentence.id]?.[segment.gapIndex] === false" class="feedback-cross">✘ <span class="correct-answer">({{ segment.correctAnswer }})</span></span>
+                    </template>
+                </div>
+                <button @click="checkAnswers" :disabled="isExerciseChecked">Check Answers</button>
+                <div v-if="isExerciseChecked" class="exercise-score">
+                    Score: {{ exerciseScore }} / {{ totalGaps }} <!-- Use totalGaps for score -->
+                </div>
+            </div>
+        </div> <!-- End Exercise Builder Section -->
+
+    </div> <!-- End #app -->
+
     <script src="/script.js"></script>
 </body>
 </html>
