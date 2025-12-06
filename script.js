@@ -228,7 +228,7 @@ function initializeApp() {
                 
                 try {
                     // First try to load from the JSON file with explicit path
-                    const response = await fetch('/default_pairs.json');
+                    const response = await fetch('default_pairs.json');
                     if (!response.ok) {
                         throw new Error('Failed to load from JSON file');
                     }
@@ -237,7 +237,7 @@ function initializeApp() {
                 } catch (jsonError) {
                     console.warn('Could not load from JSON, trying API endpoint:', jsonError);
                     // Fallback to API endpoint
-                    const apiResponse = await fetch('/api/default-pairs');
+                    const apiResponse = await fetch('api/default-pairs');
                     if (!apiResponse.ok) {
                         throw new Error('Failed to load from API');
                     }
