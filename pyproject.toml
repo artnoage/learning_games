@@ -1,0 +1,11 @@
+[project]
+name = "learning-games"
+version = "1.0.0"
+description = "Educational memory matching game"
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=2.3.0",
+]
+
+[tool.uv]
+dev-dependencies = []
